@@ -1,0 +1,100 @@
+
+#include <Servo.h>
+
+// Pin Definitions
+#define LM35_PIN A1
+#define TRIG_PIN 7
+#define ECHO_PIN 6
+#define SERVO_PIN 3
+#define SOIL_MOISTURE_PIN A2
+#define PIR_PIN 12
+#define LED_PIN 4
+
+// Servo object
+Servo myServo;
+
+// Constants
+const int TEMP_THRESHOLD = 25;  // Temperature threshold in °C
+const int DISTANCE_THRESHOLD = 10;  // Distance threshold in cm
+const int MOISTURE_THRESHOLD = 500;  // Soil moisture threshold
+
+void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+
+  // Initialize pins
+  pinMode(TRIG_PIN, OUTPUT);
+  pinMode(ECHO_PIN, INPUT);
+  pinMode(PIR_PIN, INPUT);
+  pinMode(LED_PIN, OUTPUT);
+
+  // Initialize servo
+  myServo.attach(SERVO_PIN);
+  myServo.write(0);  // Start at 0 degrees
+}
+
+void loop() {
+  // Read temperature from LM35
+  float temperature = readTemperature();
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.println(" °C");
+
+  // Read distance from HC-SR04
+  float distance = readDistance();
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Read soil moisture level
+  int moisture = analogRead(SOIL_MOISTURE_PIN);
+  Serial.print("Soil Moisture: ");
+  Serial.println(moisture);
+
+  // Read PIR sensor value
+  int motionDetected = digitalRead(PIR_PIN);
+  Serial.print("Motion Detected: ");
+  Serial.println(motionDetected);
+
+  // Control LED based on PIR sensor
+  if (motionDetected == HIGH) {
+    digitalWrite(LED_PIN, HIGH);  // Turn on LED
+  } else {
+    digitalWrite(LED_PIN, LOW);   // Turn off LED
+  }
+
+  // Control servo based on conditions
+  if (temperature > TEMP_THRESHOLD) {
+    myServo.write(90);  // Move servo to 90 degrees
+  } else if (distance < DISTANCE_THRESHOLD) {
+    myServo.write(45);  // Move servo to 45 degrees
+  } else if (moisture < MOISTURE_THRESHOLD) {
+    myServo.write(135);  // Move servo to 135 degrees
+  } else {
+    myServo.write(0);  // Default position
+  }
+
+  delay(1000);  // Wait for 1 second before repeating
+}
+
+float readTemperature() {
+  int reading = analogRead(LM35_PIN);
+  float voltage = reading * 5.0 / 1024.0;
+  return voltage * 100.0;  // Convert voltage to temperature in °C
+}
+
+float readDistance() {
+  // Trigger the HC-SR04 sensor
+  digitalWrite(TRIG_PIN, LOW);
+  delayMicroseconds(2);
+  digitalWrite(TRIG_PIN, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, LOW);
+
+  // Measure the pulse duration
+  long duration = pulseIn(ECHO_PIN, HIGH);
+  
+  // Calculate the distance
+  float distance = (duration / 2.0) * 0.0344;
+  return distance;
+}
