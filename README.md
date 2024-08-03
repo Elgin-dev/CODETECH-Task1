@@ -1,9 +1,9 @@
-Name: Elgin EB
-Company: CODETECH IT SOLUTIONS
-ID: CTO4DS5739
-Domain: INTERNET OF THINGS
-Duration: July to August
-Mentor: Muzammil Ahmed
+- Name: Elgin EB
+- Company: CODETECH IT SOLUTIONS
+- ID: CTO4DS5739
+- Domain: INTERNET OF THINGS
+- Duration: July to August
+- Mentor: Muzammil Ahmed
 
 # Overview of the Project
 ## Project: SmartHome Automation
